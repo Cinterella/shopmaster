@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import {
   collection,
   getDocs,
@@ -58,7 +59,6 @@ export const ProductsProvider = ({ children }) => {
 
         const productosFirestore = snapshot.docs.map((doc) => {
           const data = doc.data();
-
           return {
             id: doc.id,
             nombre: data.nombre,
@@ -67,7 +67,7 @@ export const ProductsProvider = ({ children }) => {
             categoria: data.categoria || "General",
             avatar:
               data.avatar ||
-              `https://picsum.photos/400/400?random=${doc.id}`,
+              `https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/330px-No-Image-Placeholder.svg.png?20200912122019`,
           };
         });
 
@@ -75,6 +75,7 @@ export const ProductsProvider = ({ children }) => {
       } catch (err) {
         console.error("Error Firestore:", err);
         setError("Hubo un problema al cargar los productos.");
+        toast.error("No se pudieron cargar los productos");
       } finally {
         setCargando(false);
       }
@@ -82,6 +83,7 @@ export const ProductsProvider = ({ children }) => {
 
     cargarProductos();
   }, []);
+
 
   /* ================= CRUD ================= */
 
@@ -94,7 +96,7 @@ export const ProductsProvider = ({ children }) => {
         categoria: nuevoProducto.categoria,
         avatar:
           nuevoProducto.avatar ||
-          `https://picsum.photos/400/400?random=${Date.now()}`,
+          `https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/330px-No-Image-Placeholder.svg.png?20200912122019`,
       };
 
       const docRef = await addDoc(
@@ -108,12 +110,17 @@ export const ProductsProvider = ({ children }) => {
       };
 
       setProductos((prev) => [productoCreado, ...prev]);
+
+      toast.success("Producto agregado correctamente");
+
       return productoCreado;
     } catch (error) {
       console.error("Error al agregar producto:", error);
+      toast.error("Error al agregar el producto");
       throw error;
     }
   };
+
 
   const editarProducto = async (productoActualizado) => {
     try {
@@ -137,22 +144,31 @@ export const ProductsProvider = ({ children }) => {
         )
       );
 
+      toast.success("Producto actualizado correctamente");
+
       return productoActualizado;
     } catch (error) {
       console.error("Error al editar producto:", error);
+      toast.error("Error al actualizar el producto");
       throw error;
     }
   };
 
+
   const eliminarProducto = async (id) => {
     try {
       await deleteDoc(doc(db, "productos", id));
+
       setProductos((prev) => prev.filter((p) => p.id !== id));
+
+      toast.success("Producto eliminado correctamente");
     } catch (error) {
       console.error("Error al eliminar producto:", error);
+      toast.error("No se pudo eliminar el producto");
       throw error;
     }
   };
+
 
   return (
     <ProductsContext.Provider

@@ -30,17 +30,45 @@ export default function Productos() {
     };
 
     // Meta tags básicos
-    updateMetaTag('description', 'Explora el catálogo de juegos de mesa. Encuentra juegos históricos, clásicos, modernos y educativos.');
-    updateMetaTag('keywords', 'juegos de mesa, juegos históricos, juegos clásicos, juegos modernos, juegos educativos');
+    updateMetaTag(
+      'description',
+      'Descubrí nuestro catálogo online con productos de múltiples categorías: indumentaria, tecnología, hogar, deportes y más. Comprá fácil y seguro.'
+    );
+
+    updateMetaTag(
+      'keywords',
+      'tienda online, ecommerce, indumentaria, tecnología, hogar, deportes, accesorios, ofertas'
+    );
+
     updateMetaTag('author', '@webmaster');
     updateMetaTag('robots', 'index, follow');
 
     // Open Graph
-    updateMetaTag('og:title', 'Tienda de Juegos de Mesa', 'property');
-    updateMetaTag('og:description', 'Explora el catálogo de juegos de mesa.', 'property');
+    updateMetaTag(
+      'og:title',
+      'Tienda Online | Productos para todos los estilos',
+      'property'
+    );
+
+    updateMetaTag(
+      'og:description',
+      'Explorá una tienda online con una amplia variedad de productos en múltiples categorías. Envíos a todo el país.',
+      'property'
+    );
+
     updateMetaTag('og:type', 'website', 'property');
-    updateMetaTag('og:image', 'https://tudominio.com/logo.jpg', 'property');
-    updateMetaTag('og:url', window.location.href, 'property');
+
+    updateMetaTag(
+      'og:image',
+      'https://tudominio.com/og-image.jpg',
+      'property'
+    );
+
+    updateMetaTag(
+      'og:url',
+      window.location.href,
+      'property'
+    );
   }, []);
 
   const productosPorPagina = 6;

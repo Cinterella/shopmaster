@@ -1,122 +1,94 @@
-import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useProducts } from "../context/ProductsContext";
 
 function EliminarProducto() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { eliminarProducto } = useProducts();
+
   const producto = location.state?.producto;
- 
   const [cargando, setCargando] = useState(false);
 
-  // Función para eliminar producto
-  const eliminarProducto = async () => {
-    if (!producto) return;
-   
-    setCargando(true);
+  if (!producto) {
+    return (
+      <div className="container py-5 text-center">
+        <p className="text-muted">Producto no encontrado</p>
+      </div>
+    );
+  }
+
+  const manejarEliminar = async () => {
+    const confirmar = window.confirm(
+      `¿Seguro que querés eliminar "${producto.nombre}"?\n\nEsta acción no se puede deshacer.`
+    );
+
+    if (!confirmar) return;
+
     try {
-      const respuesta = await
-      fetch(`https://68d482e3214be68f8c696ae2.mockapi.io/api/productos/${producto.id}`, {
-        method: 'DELETE',
-      });
-     
-      if (!respuesta.ok) {
-        throw new Error('Error al eliminar el producto.');
-      }
-
-
-      alert('Producto eliminado correctamente.');
-     
-     navigate('/productos');
-     setTimeout(() => {
-      window.location.reload();
-    }, 100);
-     
-    } catch (error) {
-      console.error(error.message);
-      alert('Hubo un problema al eliminar el producto.');
+      setCargando(true);
+      await eliminarProducto(producto.id);
+      navigate("/productos");
+    } catch {
+      // el toast de error ya lo maneja el contexto
     } finally {
       setCargando(false);
     }
   };
 
-  const manejarEliminar = () => {
-    const confirmar = window.confirm(
-      `¿Estás seguro de que deseas eliminar el producto "${producto.nombre}"?\n\nEsta acción no se puede deshacer.`
-    );
-   
-    if (confirmar) {
-      eliminarProducto();
-    }
-  };
-
-
   return (
-    <div style={{ maxWidth: '500px', margin: '40px auto', padding: '20px', textAlign: 'center' }}>
-      <h2 style={{ color: '#dc3545', marginBottom: '20px' }}>Eliminar Producto</h2>
-     
-      <div style={{
-        border: '1px solid #ddd',
-        borderRadius: '8px',
-        padding: '20px',
-        marginBottom: '30px',
-        backgroundColor: '#f8f9fa'
-      }}>
-        <h3 style={{ color: '#dc3545' }}>¿Estás seguro de que deseas eliminar este producto?</h3>
-       
-        <div style={{ textAlign: 'left', margin: '20px 0' }}>
-          <p><strong>Nombre:</strong> {producto.nombre}</p>
-          <p><strong>Precio:</strong> ${producto.precio}</p>
-          <p><strong>Categoría:</strong> {producto.categoria || 'Sin categoría'}</p>
-          <p><strong>Descripción:</strong> {producto.descripcion}</p>
-          {producto.avatar && (
-            <img
-              src={producto.avatar}
-              alt="Producto a eliminar"
-              style={{ maxWidth: '200px', marginTop: '10px' }}
-            />
-          )}
+    <div className="container py-5">
+      <div className="card shadow-sm mx-auto" style={{ maxWidth: 600 }}>
+        <div className="card-body text-center">
+          <h2 className="text-danger fw-bold mb-3">
+            Eliminar producto
+          </h2>
+
+          <p className="text-muted">
+            ¿Estás seguro de que deseas eliminar este producto?
+          </p>
+
+          <div className="text-start my-4">
+            <p><strong>Nombre:</strong> {producto.nombre}</p>
+            <p><strong>Precio:</strong> ${producto.precio}</p>
+            <p><strong>Categoría:</strong> {producto.categoria}</p>
+            <p><strong>Descripción:</strong> {producto.descripcion}</p>
+
+            {producto.avatar && (
+              <img
+                src={producto.avatar}
+                alt={producto.nombre}
+                className="img-fluid rounded mt-2"
+                style={{ maxHeight: 200 }}
+              />
+            )}
+          </div>
+
+          <div className="alert alert-warning small">
+            Esta acción es permanente y no se puede deshacer.
+          </div>
+
+          <div className="d-flex gap-3 justify-content-center mt-4">
+            <button
+              className="btn btn-danger"
+              onClick={manejarEliminar}
+              disabled={cargando}
+            >
+              {cargando ? "Eliminando..." : "Sí, eliminar"}
+            </button>
+
+            <button
+              className="btn btn-outline-secondary"
+              onClick={() => navigate("/productos")}
+              disabled={cargando}
+            >
+              Cancelar
+            </button>
+          </div>
         </div>
-
-
-        <p style={{ color: '#666', fontStyle: 'italic' }}>
-          Esta acción no se puede deshacer. El producto será eliminado permanentemente.
-        </p>
-      </div>
-
-
-      <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
-        <button
-          onClick={manejarEliminar}
-          disabled={cargando}
-          style={{
-            padding: '12px 24px',
-            backgroundColor: cargando ? '#ccc' : '#dc3545',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: cargando ? 'not-allowed' : 'pointer',
-            fontSize: '16px'
-          }}
-        >
-          {cargando ? 'Eliminando...' : 'Sí, Eliminar'}
-        </button>
-       
-        <button
-          onClick={() => navigate('/productos')}
-          disabled={cargando}
-          style={{
-            padding: '12px 24px',
-            backgroundColor: cargando ? '#ccc' : '#6c757d',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: cargando ? 'not-allowed' : 'pointer',
-            fontSize: '16px'
-          }}
-        >
-          Cancelar
-        </button>
       </div>
     </div>
   );
-} export default EliminarProducto;
+}
+
+export default EliminarProducto;
