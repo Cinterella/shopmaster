@@ -15,7 +15,7 @@ export default function Productos() {
   const [paginaActual, setPaginaActual] = useState(1);
 
     useEffect(() => {
-    document.title = "Tienda de Juegos de Mesa | Productos";
+    document.title = "Tienda | Shopmaster";
    
     // Función para actualizar meta tags
     const updateMetaTag = (name, content, attribute = 'name') => {

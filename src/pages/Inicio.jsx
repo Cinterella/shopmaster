@@ -97,7 +97,7 @@ export default function Inicio() {
       {/* HEADER */}
       <div className="text-center mb-4">
         <h1 className="home-title fw-bold">
-          Bienvenido a <span className="home-title-highlight">ShopMaster</span>
+          Bienvenido a <span className="home-title-highlight">Shopmaster</span>
         </h1>
         <p className="home-subtitle mb-1">
           Descubrí las últimas tendencias en ropa y tecnología
