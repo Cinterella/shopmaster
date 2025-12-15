@@ -1,94 +1,84 @@
 import React from "react";
-import { Box, Typography, Link as MuiLink, IconButton } from "@mui/material";
-import { Facebook, Instagram, Twitter, ShoppingBag } from "@mui/icons-material";
+import { Link } from "react-router-dom";
+import { FaFacebookF, FaInstagram, FaTwitter, FaShoppingBag } from "react-icons/fa";
 
 function Footer() {
   return (
-    <Box
-      component="footer"
-      sx={{
-        backgroundColor: "#f5f5f5",
-        padding: "40px 20px",
-        marginTop: "40px",
-        borderTop: "1px solid #ddd",
-      }}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "center",
-          gap: 4,
-          maxWidth: 1200,
-          mx: "auto",
-        }}
-      >
+    <footer className="footer-global mt-5">
+      <div className="container py-4">
 
-        <Box sx={{ flex: { xs: "100%", md: "33%" }, minWidth: 250 }}>
-          <Box display="flex" alignItems="center" gap={1} mb={1}>
-            <ShoppingBag color="primary" />
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              MiTienda
-            </Typography>
-          </Box>
-          <Typography variant="body2" color="text.secondary">
-            Tu tienda online de confianza. Ofrecemos productos de calidad con la mejor atención y precios competitivos.
-          </Typography>
-        </Box>
-        <Box sx={{ flex: { xs: "100%", md: "33%" }, minWidth: 250 }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-            Enlaces útiles
-          </Typography>
-          <Box display="flex" flexDirection="column" gap={0.5}>
-            <MuiLink href="/" color="inherit" underline="hover">
-              Inicio
-            </MuiLink>
-            <MuiLink href="/productos" color="inherit" underline="hover">
-              Productos
-            </MuiLink>
-            <MuiLink href="/servicios" color="inherit" underline="hover">
-              Servicios
-            </MuiLink>
-            <MuiLink href="/contacto" color="inherit" underline="hover">
-              Contacto
-            </MuiLink>
-          </Box>
-        </Box>
+        <div className="row gy-4">
 
-        <Box
-          sx={{
-            flex: { xs: "100%", md: "33%" },
-            minWidth: 250,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center", 
-            textAlign: "center", 
-          }}
-        >
-          <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-            Seguinos
-          </Typography>
-          <Box display="flex" gap={1} justifyContent="center">
-            <IconButton href="https://facebook.com" target="_blank" color="primary">
-              <Facebook />
-            </IconButton>
-            <IconButton href="https://instagram.com" target="_blank" color="primary">
-              <Instagram />
-            </IconButton>
-            <IconButton href="https://twitter.com" target="_blank" color="primary">
-              <Twitter />
-            </IconButton>
-          </Box>
-        </Box>
+          {/* BRAND */}
+          <div className="col-12 col-md-4">
+            <div className="d-flex align-items-center gap-2 mb-2">
+              <FaShoppingBag className="text-primary fs-4" />
+              <h5 className="mb-0 fw-bold text-dark">
+                Shopmaster
+              </h5>
+            </div>
+            <p className="text-muted small mb-0">
+              Tu tienda online de confianza. Productos de calidad,
+              buena atención y precios competitivos.
+            </p>
+          </div>
 
-      </Box>
+          {/* LINKS */}
+          <div className="col-12 col-md-4">
+            <h6 className="fw-semibold text-dark mb-2">
+              Enlaces útiles
+            </h6>
+            <ul className="list-unstyled mb-0 footer-links">
+              <li><Link to="/">Inicio</Link></li>
+              <li><Link to="/productos">Productos</Link></li>
+              <li><Link to="/servicios">Servicios</Link></li>
+            </ul>
+          </div>
 
-      <Box textAlign="center" mt={4}>
-        <Typography variant="body2" color="text.secondary">
-          © {new Date().getFullYear()} MiTienda — Copyright
-        </Typography>
-      </Box>
-    </Box>
+          {/* SOCIAL */}
+          <div className="col-12 col-md-4 text-md-center">
+            <h6 className="fw-semibold text-dark mb-2">
+              Seguinos
+            </h6>
+            <div className="d-flex justify-content-md-center gap-3">
+              <a
+                href="https://facebook.com"
+                target="_blank"
+                rel="noreferrer"
+                className="footer-social"
+              >
+                <FaFacebookF />
+              </a>
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noreferrer"
+                className="footer-social"
+              >
+                <FaInstagram />
+              </a>
+              <a
+                href="https://twitter.com"
+                target="_blank"
+                rel="noreferrer"
+                className="footer-social"
+              >
+                <FaTwitter />
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+        {/* COPYRIGHT */}
+        <div className="text-center border-top pt-3 mt-4">
+          <small className="text-muted">
+            © {new Date().getFullYear()} Shopmaster — Todos los derechos reservados
+          </small>
+        </div>
+
+      </div>
+    </footer>
   );
 }
 

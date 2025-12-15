@@ -1,157 +1,77 @@
-import React, { useEffect, useState } from "react";
-import { Link, useParams, useLocation, useNavigate } from "react-router-dom";
-import {
-  Container,
-  Box,
-  Card,
-  CardMedia,
-  Typography,
-  Button,
-  Rating,
-  CircularProgress,
-} from "@mui/material";
-import { useAppContext } from "../context/AppContext";
+import { Link, useParams, useLocation } from "react-router-dom";
+
 
 const ProductoDetalle = () => {
-  const { id } = useParams();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { agregarAlCarrito } = useAppContext();
-
-  const productoDesdeState = location.state?.producto ?? null;
-  const [producto, setProducto] = useState(productoDesdeState);
-  const [cargando, setCargando] = useState(!productoDesdeState);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (productoDesdeState) return;
-
-    setCargando(true);
-    fetch(`https://fakestoreapi.com/products/${id}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Error al obtener el producto");
-        return res.json();
-      })
-      .then((data) => {
-        setProducto(data);
-        setCargando(false);
-      })
-      .catch(() => {
-        setError("No se pudo cargar el producto");
-        setCargando(false);
-      });
-  }, [id, productoDesdeState]);
-
-  if (cargando)
+ 
+    const { id } = useParams();
+    const location = useLocation();
+    const producto = location.state?.producto;
+  
     return (
-      <Container sx={{ mt: 6, textAlign: "center" }}>
-        <CircularProgress />
-      </Container>
-    );
+    <div className="container-md py-4 mt-5 mb-5 product-detail">
+        <h2 className="product-detail-title mb-4">
+            Detalles del producto
+        </h2>
 
-  if (error)
-    return (
-      <Container sx={{ mt: 6, textAlign: "center" }}>
-        <Typography color="error">{error}</Typography>
-        <Button sx={{ mt: 2 }} variant="outlined" onClick={() => navigate("/productos")}>
-          Volver a Productos
-        </Button>
-      </Container>
-    );
+        {/* FILA SUPERIOR */}
+        <div className="row align-items-start mb-4">
 
-  if (!producto)
-    return (
-      <Container sx={{ mt: 6, textAlign: "center" }}>
-        <Typography>No se encontró el producto.</Typography>
-        <Button component={Link} to="/productos" variant="outlined" sx={{ mt: 2 }}>
-          Volver
-        </Button>
-      </Container>
-    );
+            {/* IMAGEN */}
+            <div className="col-12 col-md-6 mb-3 mb-md-0">
+            <div className="product-image-wrapper text-center">
+                <img
+                src={producto.avatar}
+                alt={producto.nombre}
+                className="img-fluid product-image"
+                />
+            </div>
+            </div>
 
-  const { title, description, price, image, category, rating } = producto;
+            {/* INFO */}
+            <div className="col-12 col-md-6">
+            <div className="product-info">
 
-  return (
-    <Container sx={{ mt: 6 }}>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: { xs: "column", md: "row" },
-          gap: 4,
-        }}
-      >
-        <Card
-          elevation={4}
-          sx={{
-            flex: { xs: "100%", md: "50%" },
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            p: 2,
-            borderRadius: 3,
-            backgroundColor: "#fafafa",
-          }}
-        >
-          <CardMedia
-            component="img"
-            image={image}
-            alt={title}
-            sx={{
-              width: "100%",
-              height: "auto",
-              objectFit: "contain",
-            }}
-          />
-        </Card>
+                <h4 className="product-name">
+                {producto.nombre}
+                </h4>
 
-        <Box
-          sx={{
-            flex: { xs: "100%", md: "50%" },
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-          }}
-        >
-          <Typography variant="h5" fontWeight={700}>
-            {title}
-          </Typography>
+                <div className="product-section">
+                <span className="product-label">Descripción</span>
+                <p className="product-description">
+                    {producto.descripcion}
+                </p>
+                </div>
 
-          <Typography variant="subtitle1" color="text.secondary">
-            Categoría: {category ?? "Sin categoría"}
-          </Typography>
+                <div className="product-section">
+                <span className="product-label">Categoría</span>
+                <span className="product-category">
+                    {producto.categoria}
+                </span>
+                </div>
 
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Rating value={rating?.rate ?? 0} precision={0.1} readOnly />
-            <Typography variant="body2" color="text.secondary">
-              ({rating?.count ?? 0} reseñas)
-            </Typography>
-          </Box>
+                <div className="product-section product-price-wrapper">
+                <span className="product-label">Precio</span>
+                <span className="product-price">
+                    ${producto.precio}
+                </span>
+                </div>
 
-          <Typography variant="h6" color="primary" sx={{ fontWeight: 700 }}>
-            ${price}
-          </Typography>
+            </div>
+            </div>
+        </div>
 
-          <Typography variant="body1" color="text.primary" sx={{ mt: 1 }}>
-            {description}
-          </Typography>
-
-          <Box sx={{ display: "flex", gap: 2, mt: 3, flexWrap: "wrap" }}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => agregarAlCarrito(producto)}
+        {/* VOLVER */}
+        <div className="row">
+            <div className="col-12 text-center">
+            <Link
+                to="/productos"
+                className="btn product-back-btn"
             >
-              Agregar al carrito
-            </Button>
+                Volver a productos
+            </Link>
+            </div>
+        </div>
+    </div>
 
-            <Button variant="outlined" component={Link} to="/productos">
-              Volver al catálogo
-            </Button>
-          </Box>
-        </Box>
-      </Box>
-    </Container>
-  );
-};
-
-export default ProductoDetalle;
+    );
+}; export default ProductoDetalle;

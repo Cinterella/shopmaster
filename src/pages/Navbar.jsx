@@ -1,51 +1,125 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { useAppContext } from "../context/AppContext";
-import { ShoppingCart, Menu, X, User, LogOut } from "lucide-react";
-import { Badge, IconButton, Box, Typography } from "@mui/material";
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuthContext } from "../context/AuthContext";
+import { useCartContext } from "../context/CartContext";
+import { FaShoppingCart } from "react-icons/fa";
 
 function Navbar() {
-  const { isAuthenticated, usuario, carrito, cerrarSesion } = useAppContext();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const { usuario, isAuthenticated, cerrarSesion } = useAuthContext();
+  const { vaciarCarrito, carrito } = useCartContext();
+  const navigate = useNavigate();
+
+  const totalItemsCarrito = carrito.reduce(
+    (total, item) => total + item.cantidad,
+    0
+  );
+
+  const manejarCerrarSesion = () => {
+    navigate("/productos");
+    setTimeout(() => {
+      vaciarCarrito();
+      cerrarSesion();
+    }, 100);
+  };
 
   return (
-    <nav className="navbar">
-      <div className="navbar-brand">
-        <Link to="/">ShopMaster</Link>
-        <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
-          {menuOpen ? <X size={28} /> : <Menu size={28} />}
-        </button>
-      </div>
+    <>
+      <nav className="navbar navbar-expand-lg navbar-global fixed-top">
+        <div className="container-fluid">
 
-      <ul className={`navbar-links ${menuOpen ? "active" : ""}`}>
-        <li><Link to="/">Inicio</Link></li>
-        <li><Link to="/servicios">Servicios</Link></li>
-        <li><Link to="/productos">Productos</Link></li>
+          {/* LOGO */}
+          <Link to="/" className="navbar-brand navbar-logo">
+            Shopmaster
+          </Link>
 
-        <li className="auth-section">
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <IconButton component={Link} to="/pagar" color="inherit" size="large">
-              <Badge badgeContent={carrito.length} color="error">
-                <ShoppingCart size={24} />
-              </Badge>
-            </IconButton>
+          {/* TOGGLER */}
+          <button
+            className="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarContent"
+            aria-controls="navbarContent"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span className="navbar-toggler-icon"></span>
+          </button>
 
-            {isAuthenticated ? (
-              <>
-                <Typography variant="body2">{usuario.nombre}</Typography>
-                <IconButton onClick={cerrarSesion} color="inherit" title="Cerrar sesión">
-                  <LogOut size={24} />
-                </IconButton>
-              </>
-            ) : (
-              <Link to="/iniciar-sesion" title="Iniciar sesión">
-                <User size={24} />
+          {/* COLLAPSE */}
+          <div className="collapse navbar-collapse" id="navbarContent">
+
+            {/* MENÚ IZQUIERDA */}
+            <ul className="navbar-nav">
+              <li className="nav-item">
+                <Link to="/" className="nav-link nav-link-global">Inicio</Link>
+              </li>
+              <li className="nav-item">
+                <Link to="/servicios" className="nav-link nav-link-global">Servicios</Link>
+              </li>
+              <li className="nav-item">
+                <Link to="/productos" className="nav-link nav-link-global">Productos</Link>
+              </li>
+
+              {usuario?.nombre === "admin" && (
+                <li className="nav-item">
+                  <Link
+                    to="/formulario-producto"
+                    className="nav-link nav-link-global success"
+                  >
+                    + Agregar Producto
+                  </Link>
+                </li>
+              )}
+            </ul>
+
+            {/* ACCIONES DERECHA */}
+            <div className="navbar-actions ms-auto">
+              <Link to="/pagar" className="cart-link me-3">
+                <FaShoppingCart />
+                {totalItemsCarrito > 0 && (
+                  <span className="cart-badge">{totalItemsCarrito}</span>
+                )}
               </Link>
-            )}
-          </Box>
-        </li>
-      </ul>
-    </nav>
+
+              {isAuthenticated ? (
+                <>
+                  <span className="welcome-text me-3">
+                    Hola, {usuario.nombre}
+                  </span>
+
+                  {usuario.nombre === "admin" && (
+                    <Link
+                      to="/dashboard"
+                      className="nav-link nav-link-global d-inline-block me-3"
+                    >
+                      Dashboard
+                    </Link>
+                  )}
+
+                  <button
+                    onClick={manejarCerrarSesion}
+                    className="btn btn-outline-light btn-sm primary p-2"
+                  >
+                    Cerrar sesión
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/iniciar-sesion"
+                  className="nav-link nav-link-global"
+                >
+                  Iniciar sesión
+                </Link>
+              )}
+            </div>
+
+          </div>
+        </div>
+      </nav>
+
+      <div className="navbar-spacer" />
+
+    </>
   );
 }
 

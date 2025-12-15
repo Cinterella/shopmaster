@@ -1,15 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import {
-  Card,
-  CardMedia,
-  CardContent,
-  Typography,
-  Button,
-  Box,
-  IconButton,
-} from "@mui/material";
-import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebase/firebase";
 
 export default function Inicio() {
   const [productos, setProductos] = useState([]);
@@ -17,40 +10,66 @@ export default function Inicio() {
   const autoplayRef = useRef(null);
   const dragStartX = useRef(null);
 
+  /* ================= CARGAR PRODUCTOS DESDE FIREBASE ================= */
+
   useEffect(() => {
-    fetch("https://fakestoreapi.com/products")
-      .then((res) => res.json())
-      .then((data) => {
-        setProductos(data || []);
-        if (data && data.length > 0) setIndex(Math.floor(Math.random() * data.length));
-      })
-      .catch((err) => console.error("Error cargando productos para slider:", err));
+    const cargarProductos = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "productos"));
+
+        const productosFirestore = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        setProductos(productosFirestore);
+
+        if (productosFirestore.length) {
+          setIndex(
+            Math.floor(Math.random() * productosFirestore.length)
+          );
+        }
+      } catch (error) {
+        console.error("Error cargando productos:", error);
+      }
+    };
+
+    cargarProductos();
   }, []);
+
+  /* ================= AUTOPLAY ================= */
 
   useEffect(() => {
     stopAutoplay();
     startAutoplay();
-    return () => stopAutoplay();
+    return stopAutoplay;
   }, [productos, index]);
 
   const startAutoplay = () => {
     stopAutoplay();
     autoplayRef.current = setInterval(() => {
-      setIndex((prev) => (productos.length ? (prev + 1) % productos.length : prev));
+      setIndex((prev) =>
+        productos.length ? (prev + 1) % productos.length : prev
+      );
     }, 5000);
   };
 
   const stopAutoplay = () => {
-    if (autoplayRef.current) {
-      clearInterval(autoplayRef.current);
-      autoplayRef.current = null;
-    }
+    if (autoplayRef.current) clearInterval(autoplayRef.current);
   };
 
-  const prev = () => setIndex((i) => (productos.length ? (i - 1 + productos.length) % productos.length : 0));
-  const next = () => setIndex((i) => (productos.length ? (i + 1) % productos.length : 0));
+  /* ================= CONTROLES ================= */
 
-  // EVENTO DRAG para el sliderr
+  const prev = () =>
+    setIndex((i) =>
+      productos.length ? (i - 1 + productos.length) % productos.length : 0
+    );
+
+  const next = () =>
+    setIndex((i) =>
+      productos.length ? (i + 1) % productos.length : 0
+    );
+
   const handleMouseDown = (e) => {
     dragStartX.current = e.clientX;
     stopAutoplay();
@@ -59,13 +78,9 @@ export default function Inicio() {
   const handleMouseMove = (e) => {
     if (dragStartX.current !== null) {
       const diff = e.clientX - dragStartX.current;
-      if (diff > 50) {
-        prev();
-        dragStartX.current = null;
-      } else if (diff < -50) {
-        next();
-        dragStartX.current = null;
-      }
+      if (diff > 50) prev();
+      if (diff < -50) next();
+      dragStartX.current = null;
     }
   };
 
@@ -74,123 +89,103 @@ export default function Inicio() {
     startAutoplay();
   };
 
-  const currentProduct = productos.length ? productos[index] : null;
+  const producto = productos[index];
 
   return (
-    <Box sx={{ padding: 3, userSelect: "none" }}>
-      <Box sx={{ textAlign: "center", maxWidth: 1080, margin: "0 auto" }}>
-        <Typography variant="h3" component="h1" gutterBottom>
-          Bienvenido a <strong>ShopMaster</strong>
-        </Typography>
-        <Typography variant="h6" paragraph>
-          Descubrí las últimas tendencias en <strong>ropa</strong> y <strong>productos electrónicos</strong>. 
-        </Typography>
-        <Typography variant="body1" paragraph>
-          Aprovechá nuestras promociones exclusivas y elegí productos de calidad a los mejores precios.
-        </Typography>
+    <div className="container py-5 home">
 
-        <Box
-          sx={{
-            mt: 4,
-            mb: 2,
-            display: "flex",
-            justifyContent: "center",
-            flexWrap: "wrap",
-          }}
+      {/* HEADER */}
+      <div className="text-center mb-4">
+        <h1 className="home-title fw-bold">
+          Bienvenido a <span className="home-title-highlight">ShopMaster</span>
+        </h1>
+        <p className="home-subtitle mb-1">
+          Descubrí las últimas tendencias en ropa y tecnología
+        </p>
+        <p className="home-subtitle">
+          Calidad, diseño y precio en un solo lugar
+        </p>
+      </div>
+
+      {/* SLIDER */}
+      <div className="row justify-content-center">
+        <div
+          className="col-12 col-md-10 col-lg-8 home-slider"
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
         >
-          <Box
-            sx={{ width: "75%", cursor: "grab" }}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-          >
-            {currentProduct ? (
-              <Card
-                elevation={4}
-                sx={{ transition: "transform 0.3s, box-shadow 0.3s", "&:hover": { transform: "translateY(-6px)", boxShadow: 8 } }}
-              >
-                <CardMedia
-                  component="img"
-                  height="240"
-                  image={currentProduct.image}
-                  alt={currentProduct.title}
-                  sx={{ objectFit: "contain", bgcolor: "#fafafa", p: 2 }}
-                />
-                <CardContent>
-                  <Typography variant="h6" noWrap sx={{ fontWeight: 600 }}>
-                    {currentProduct.title}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{
-                      mt: 1,
-                      height: 56,
-                      overflow: "hidden",
-                      display: "-webkit-box",
-                      WebkitLineClamp: 3,
-                      WebkitBoxOrient: "vertical",
-                    }}
+          {producto ? (
+            <div className="card home-product-card">
+              <img
+                src={producto.avatar}
+                alt={producto.nombre}
+                className="card-img-top home-product-img"
+              />
+
+              <div className="card-body">
+                <h5 className="card-title fw-semibold text-truncate">
+                  {producto.nombre}
+                </h5>
+
+                <p className="card-text home-product-description">
+                  {producto.descripcion}
+                </p>
+
+                <div className="d-flex justify-content-between align-items-center mt-3">
+                  <span className="home-product-price">
+                    ${producto.precio}
+                  </span>
+
+                  <Link
+                    to={`/productos/${producto.id}`}
+                    state={{ producto }}
+                    className="btn btn-primary btn-sm"
                   >
-                    {currentProduct.description}
-                  </Typography>
-                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mt: 2 }}>
-                    <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                      ${currentProduct.price}
-                    </Typography>
-                    <Button
-                      component={Link}
-                      to={`/productos/${currentProduct.category || "sin-categoria"}/${currentProduct.id}`}
-                      state={{ producto: currentProduct }}
-                      variant="contained"
-                      size="small"
-                    >
-                      Ver producto
-                    </Button>
-                  </Box>
-                </CardContent>
-              </Card>
-            ) : (
-              <Box sx={{ height: 300, display: "flex", alignItems: "center", justifyContent: "center", bgcolor: "#fafafa", borderRadius: 1 }}>
-                <Typography>Buscando producto destacado...</Typography>
-              </Box>
-            )}
-          </Box>
-        </Box>
+                    Ver producto
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-5 text-muted">
+              Cargando producto destacado...
+            </div>
+          )}
+        </div>
+      </div>
 
-        <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 2 }}>
-          <IconButton aria-label="Anterior" onClick={prev} sx={{ border: 1, borderColor: "divider" }}>
-            <ArrowBackIos />
-          </IconButton>
-          <IconButton aria-label="Siguiente" onClick={next} sx={{ border: 1, borderColor: "divider" }}>
-            <ArrowForwardIos />
-          </IconButton>
-        </Box>
+      {/* CONTROLES */}
+      <div className="d-flex justify-content-center gap-3 mt-4">
+        <button
+          className="btn btn-outline-secondary home-slider-btn"
+          onClick={prev}
+        >
+          <FaChevronLeft />
+        </button>
 
-        <Box sx={{ textAlign: "center", mt: 3 }}>
-          <Typography variant="body2" color="text.secondary" sx={{ m: 3 }}>
-            Explora nuestro catálogo completo y encuentra la combinación perfecta entre estilo y tecnología.
-          </Typography>
-          <Button
-            component={Link}
-            to="/productos"
-            variant="contained"
-            color="primary"
-            size="large"
-            sx={{
-              fontWeight: 700,
-              px: 4,
-              py: 1.5,
-              boxShadow: 3,
-              "&:hover": { transform: "scale(1.05)", boxShadow: 6 },
-              transition: "transform 0.3s, box-shadow 0.3s",
-            }}
-          >
-            Ver todos los productos
-          </Button>
-        </Box>
-      </Box>
-    </Box>
+        <button
+          className="btn btn-outline-secondary home-slider-btn"
+          onClick={next}
+        >
+          <FaChevronRight />
+        </button>
+      </div>
+
+      {/* CTA */}
+      <div className="text-center mt-5">
+        <p className="home-cta-text mb-3">
+          Explorá el catálogo completo y encontrá tu próximo favorito
+        </p>
+        <Link
+          to="/productos"
+          className="btn btn-primary btn-lg px-4"
+        >
+          Ver todos los productos
+        </Link>
+      </div>
+
+    </div>
   );
 }

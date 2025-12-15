@@ -1,117 +1,150 @@
 import { useNavigate } from "react-router-dom";
-import { useAppContext } from "../context/AppContext";
-import {
-  Box,
-  Card,
-  CardMedia,
-  CardContent,
-  Typography,
-  Button,
-  Divider,
-  IconButton,
-} from "@mui/material";
-import { ShoppingCart, Delete } from "@mui/icons-material";
+import { useAuthContext } from '../context/AuthContext';
+import { useCartContext } from '../context/CartContext';
+
 
 export default function Pagar() {
-  const { usuario, cerrarSesion, carrito, vaciarCarrito } = useAppContext();
+  const { usuario, cerrarSesion } = useAuthContext();
+  const { carrito, total, vaciarCarrito } = useCartContext();
   const navigate = useNavigate();
 
-  const total = carrito
-  .reduce((suma, producto) => suma + Number(producto.price), 0)
-  .toFixed(2);
 
+  const tokenActual = localStorage.getItem('authToken');
+
+
+  // Función para finalizar compra
   const comprar = () => {
     alert("¡Compra realizada con éxito!");
-    vaciarCarrito();
+    vaciarCarrito(); // Limpiar carrito después de comprar
     navigate("/productos");
   };
 
+    const manejarCerrarSesion = () => {
+    vaciarCarrito(); // ← Primero vaciar el carrito en el estado
+    cerrarSesion(); // ← Luego cerrar sesión
+    navigate("/productos"); // ← Redirigir
+  };
+
+
   return (
-    <Box sx={{ maxWidth: 900, margin: "0 auto", p: 3 }}>
-      <Card sx={{ mb: 3, p: 2 }}>
-        <Typography variant="h5" sx={{ fontWeight: 600 }}>
-          {usuario.nombre}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
+    <>
+      {/* INFO USUARIO */}
+      <div className="checkout-user text-center">
+
+        <h2 className="checkout-user-title">
+          Hola {usuario.nombre}
+        </h2>
+
+        <p className="checkout-user-email">
           Email: {usuario.email}
-        </Typography>
-        <Button
-          variant="outlined"
-          color="secondary"
-          sx={{ mt: 1 }}
-          onClick={cerrarSesion}
+        </p>
+
+        <div className="checkout-user-token">
+          <strong>Token:</strong> {tokenActual}
+        </div>
+
+        <button
+          onClick={manejarCerrarSesion}
+          className="btn btn-outline-primary-global btn-sm"
         >
           Cerrar sesión
-        </Button>
-      </Card>
+        </button>
 
-      <Card sx={{ p: 2 }}>
-        <Typography variant="h5" sx={{ mb: 2 }}>
-          Tu compra <ShoppingCart sx={{ verticalAlign: "middle", ml: 1 }} />
-        </Typography>
-        <Divider sx={{ mb: 2 }} />
+        <hr />
+      </div>
+
+      {/* CARRITO */}
+      <div className="container p-4 checkout-cart mb-3">
+
+        <h2 className="mb-4 checkout-cart-title">
+          Tu compra
+        </h2>
 
         {carrito.length > 0 ? (
           <>
-            {carrito.map((producto) => (
-              <Card
-                key={producto.id}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 2,
-                  mb: 2,
-                  p: 1,
-                }}
-                variant="outlined"
-              >
-                <CardMedia
-                  component="img"
-                  image={producto.image}
-                  alt={producto.title}
-                  sx={{ width: 80, height: 80, objectFit: "contain" }}
-                />
-                <CardContent sx={{ flexGrow: 1, p: 0 }}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                    {producto.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    ${producto.price}
-                  </Typography>
-                </CardContent>
-                <IconButton
-                  color="error"
-                  onClick={() =>
-                    alert("Implementar función de eliminar producto del carrito")
-                  }
+            {carrito.map((producto) => {
+              const cantidad = Number(producto.cantidad || 1);
+              const precioUnitario = Number(producto.precio || 0);
+              const subtotal = cantidad * precioUnitario;
+
+              return (
+                <div
+                  key={producto.id}
+                  className="checkout-item"
                 >
-                  <Delete />
-                </IconButton>
-              </Card>
-            ))}
-            <Typography variant="h6" sx={{ mt: 2, fontWeight: 700 }}>
-              Total a pagar: ${total}
-            </Typography>
+                  <img
+                    src={producto.avatar}
+                    alt={producto.nombre}
+                    className="checkout-item-img"
+                  />
+
+                  <div className="checkout-item-info">
+                    <div className="checkout-item-name">
+                      {producto.nombre}
+                    </div>
+
+                    <div className="checkout-item-detail">
+                      Precio unidad: ${precioUnitario.toFixed(3)}
+                    </div>
+
+                    <div className="checkout-item-qty">
+                      Cantidad: {cantidad}
+                    </div>
+
+                    <div className="checkout-item-subtotal">
+                      Subtotal: ${subtotal.toFixed(3)}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            <hr />
+
+            <h3 className="checkout-total">
+              Total a pagar: ${Number(total).toFixed(3)}
+            </h3>
           </>
         ) : (
-          <Typography>No hay productos en el carrito</Typography>
+          <p className="checkout-empty">
+            No hay productos en el carrito
+          </p>
         )}
-      </Card>
+      </div>
 
-      <Box sx={{ display: "flex", gap: 2, mt: 3, flexWrap: "wrap" }}>
-        {carrito.length > 0 && (
-          <Button variant="contained" color="primary" onClick={comprar}>
-            Confirmar y Pagar
-          </Button>
-        )}
-        <Button
-          variant="outlined"
-          color="secondary"
-          onClick={() => navigate("/productos")}
+      {/* ACCIONES */}
+      <div className="container checkout-actions">
+
+        <button
+          className="btn btn-outline-danger btn-sm"
+          onClick={vaciarCarrito}
         >
-          {carrito.length > 0 ? "Seguir Comprando" : "Volver a Productos"}
-        </Button>
-      </Box>
-    </Box>
+          Vaciar carrito
+        </button>
+
+        <div className="mt-3">
+          <button
+            className="btn btn-outline-primary-global me-2"
+            onClick={() => navigate("/productos")}
+          >
+            {carrito.length > 0
+              ? "Seguir comprando"
+              : "Volver a productos"}
+          </button>
+
+          {carrito.length > 0 && (
+            <button
+              className="btn btn-primary-global"
+              onClick={comprar}
+            >
+              Confirmar y pagar
+            </button>
+          )}
+        </div>
+      </div>
+    </>
   );
+
 }
+
+

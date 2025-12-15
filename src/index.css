@@ -209,9 +209,6 @@ main {
 .product-description {
   font-size: 0.9rem;
   color: #555;
-  height: 40px;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .product-price {
